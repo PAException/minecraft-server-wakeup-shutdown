@@ -212,3 +212,4 @@ buildNumber.properties
 
 *.iml
 config.json
+.idea/
