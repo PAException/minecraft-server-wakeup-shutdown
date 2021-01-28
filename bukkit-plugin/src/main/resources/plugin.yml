@@ -1,0 +1,4 @@
+author: PA_Exception
+name: NCSWS
+version: 1.0
+main: io.github.paexception.mcsws.plugin.MCSWS
