@@ -1,13 +1,13 @@
 package io.github.paexception.mcsws.server;
 
+import io.github.paexception.mcsws.server.config.Config;
 import io.github.paexception.mcsws.server.config.ConfigHandler;
 import io.github.paexception.mcsws.server.endpoints.ClientHandler;
 import io.github.paexception.mcsws.server.endpoints.MinecraftServerConnection;
 import io.github.paexception.mcsws.server.util.CLI;
+import io.github.paexception.mcsws.server.util.WakeOnLan;
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.ServerSocket;
-import java.net.SocketException;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,15 +64,8 @@ public class Server {
 		minecraftServerConnection = new MinecraftServerConnection();
 		executorService.submit(minecraftServerConnection);
 
-		try {
-			DatagramSocket socket = new DatagramSocket();
-
-
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-
-		//TODO send magic paket
+		WakeOnLan wakeOnLan = new WakeOnLan(Config.convertMac(Server.getConfigHandler().getConfig().getRemoteMac()));
+		wakeOnLan.wakeOnLan();
 	}
 
 	public static ConfigHandler getConfigHandler() {

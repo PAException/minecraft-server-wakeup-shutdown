@@ -18,7 +18,7 @@ public class ConfigHandler {
 	public void loadConfig() {
 		try {
 			if (file.exists() && !file.isDirectory())
-					this.config = gson.fromJson(new InputStreamReader(new FileInputStream(file)), Config.class);
+				this.config = gson.fromJson(new InputStreamReader(new FileInputStream(file)), Config.class);
 			else {
 				file.createNewFile();
 				this.config = Config.getDefault();
@@ -39,7 +39,7 @@ public class ConfigHandler {
 		try {
 			if (!file.exists() || file.isDirectory()) file.createNewFile();
 			String json = gson.toJson(this.config);
-			json+="\n";
+			json += "\n";
 			FileOutputStream out = new FileOutputStream(file);
 			out.write(json.getBytes());
 			out.close();

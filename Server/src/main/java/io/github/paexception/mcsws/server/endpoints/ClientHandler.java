@@ -1,8 +1,8 @@
 package io.github.paexception.mcsws.server.endpoints;
 
+import io.github.paexception.mcsws.server.Server;
 import io.github.paexception.mcsws.server.util.Encryption;
 import io.github.paexception.mcsws.server.util.PlayerInfo;
-import io.github.paexception.mcsws.server.Server;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.net.Socket;
@@ -20,6 +20,25 @@ public class ClientHandler implements Runnable {
 
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
+	}
+
+	public static void playerDisconnected(UUID uuid, String name) {
+		Optional<ClientHandler> clientHandler = connected.stream()
+				.filter(handler -> handler.getPlayerInfo().getUuid().equals(uuid)).findFirst();
+		if (!clientHandler.isPresent()) return;
+
+		try {
+			clientHandler.get().write("await_reconnect");
+		} catch (IOException ignored) {
+		}
+
+		Server.getMinecraftServerConnection().awaitConnection(
+				new PlayerAwaitConnectionTask(
+						clientHandler.get(),
+						Server.getConfigHandler().getConfig().getMaxRejoinDelay()
+				)
+		);
+		System.out.println("[INFO] " + name + "(" + uuid + ") disconnected from the server. Waiting for reconnect...");
 	}
 
 	@Override
@@ -52,6 +71,7 @@ public class ClientHandler implements Runnable {
 								Server.getConfigHandler().getConfig().getMaxJoinDelay()
 						)
 				);
+				this.write("await_connection");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -61,22 +81,6 @@ public class ClientHandler implements Runnable {
 
 	public void write(String msg) throws IOException {
 		this.socket.getOutputStream().write(this.encryption.encryptAES(msg));
-	}
-
-	public static void playerDisconnected(UUID uuid, String name) {
-		Optional<ClientHandler> clientHandler = connected.stream()
-				.filter(handler -> handler.getPlayerInfo().getUuid().equals(uuid)).findFirst();
-		if (!clientHandler.isPresent()) return;
-
-		try { clientHandler.get().write("await_reconnect"); } catch (IOException ignored) {}
-
-		Server.getMinecraftServerConnection().awaitConnection(
-				new PlayerAwaitConnectionTask(
-						clientHandler.get(),
-						Server.getConfigHandler().getConfig().getMaxRejoinDelay()
-				)
-		);
-		System.out.println("[INFO] " + name + "(" + uuid + ") disconnected from the server. Waiting for reconnect...");
 	}
 
 	public void disconnect() {

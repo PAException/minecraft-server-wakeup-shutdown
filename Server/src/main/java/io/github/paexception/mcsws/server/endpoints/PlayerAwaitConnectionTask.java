@@ -17,7 +17,10 @@ public class PlayerAwaitConnectionTask extends TimerTask {
 	@Override
 	public void run() {
 		if (this.clientHandler != null) {
-			try { this.clientHandler.write("player_not_connected"); } catch (IOException ignored) {}
+			try {
+				this.clientHandler.write("player_not_connected");
+			} catch (IOException ignored) {
+			}
 			this.clientHandler.disconnect();
 		}
 	}

@@ -12,14 +12,14 @@ public class CLI implements Runnable {
 	public void run() {
 		String[] input;
 		while (true) {
-			input = sc.nextLine().split(" ");
+			input = this.sc.nextLine().split(" ");
 			if (input.length > 0) {
 				if (input[0].equalsIgnoreCase("stop")) break;
 				else if (input[0].equalsIgnoreCase("reload") || input[0].equalsIgnoreCase("rl")) {
 					Server.getConfigHandler().loadConfig();
 					System.out.println("[INFO] Reloaded config! (Networking changes apply by restarting the server)");
-				} else if (input.length > 1 && PlayerInfo.isUUID(input[1].replaceAll("\n",""))) {
-					input[1] = input[1].replaceAll("\n","");
+				} else if (input.length > 1 && PlayerInfo.isUUID(input[1].replaceAll("\n", ""))) {
+					input[1] = input[1].replaceAll("\n", "");
 					if (input[0].equalsIgnoreCase("add")) {
 						Server.getConfigHandler().getConfig().addWakeupPermittedPlayer(UUID.fromString(input[1]));
 						System.out.println("[INFO] Added " + input[1] + " as a wakeup permitted player");

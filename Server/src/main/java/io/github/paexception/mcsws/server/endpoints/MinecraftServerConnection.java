@@ -36,7 +36,7 @@ public class MinecraftServerConnection implements Runnable {
 
 	private void handle() {
 		this.awaitingConnections.forEach(task -> Server.getTimer().schedule(task, task.getTimout()));
-		Server.getExecutorService().submit(new MinecraftServerConnectionInputStreamHandler(socket));
+		Server.getExecutorService().submit(new MinecraftServerConnectionInputStreamHandler(this.socket));
 	}
 
 	public void stopServer() {
@@ -53,7 +53,7 @@ public class MinecraftServerConnection implements Runnable {
 		this.awaitingConnections.add(task);
 	}
 
-	private class MinecraftServerConnectionInputStreamHandler implements Runnable{
+	private class MinecraftServerConnectionInputStreamHandler implements Runnable {
 
 		private final Socket socket;
 		private String[] input;
@@ -70,20 +70,22 @@ public class MinecraftServerConnection implements Runnable {
 		public void run() {
 			try {
 				while (this.socket.isConnected()) {
-					input = new String(this.socket.getInputStream().readAllBytes()).split("\\.");
-					if (input.length == 3 && PlayerInfo.isUUID(input[2])) {
-						if (input[0].equalsIgnoreCase("join")) {
-							System.out.println("[INFO] " + input[1] + "(" + input[2]
+					this.input = new String(this.socket.getInputStream().readAllBytes()).split("\\.");
+					if (this.input.length == 3 && PlayerInfo.isUUID(this.input[2])) {
+						if (this.input[0].equalsIgnoreCase("join")) {
+							System.out.println("[INFO] " + this.input[1] + "(" + this.input[2]
 									+ ") successful connected to the server");
 							MinecraftServerConnection.this.awaitingConnections.stream().filter(task ->
-									UUID.fromString(input[2]).equals(task.getUUID()))
+									UUID.fromString(this.input[2]).equals(task.getUUID()))
 									.findFirst().ifPresent(TimerTask::cancel);
-						} else if (input[0].equalsIgnoreCase("quit")) {
-							ClientHandler.playerDisconnected(UUID.fromString(input[2]), input[1]);
-						} else if (input[0].equalsIgnoreCase("add")) {
-							Server.getConfigHandler().getConfig().addWakeupPermittedPlayer(UUID.fromString(input[2]));
-						} else if (input[0].equalsIgnoreCase("remove")) {
-							Server.getConfigHandler().getConfig().removeWakeupPermittedPlayer(UUID.fromString(input[2]));
+						} else if (this.input[0].equalsIgnoreCase("quit")) {
+							ClientHandler.playerDisconnected(UUID.fromString(this.input[2]), this.input[1]);
+						} else if (this.input[0].equalsIgnoreCase("add")) {
+							Server.getConfigHandler().getConfig()
+									.addWakeupPermittedPlayer(UUID.fromString(this.input[2]));
+						} else if (this.input[0].equalsIgnoreCase("remove")) {
+							Server.getConfigHandler().getConfig()
+									.removeWakeupPermittedPlayer(UUID.fromString(this.input[2]));
 						}
 					}
 				}

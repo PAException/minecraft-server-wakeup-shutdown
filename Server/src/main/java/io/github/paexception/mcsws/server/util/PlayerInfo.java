@@ -16,39 +16,6 @@ public class PlayerInfo {
 		this.inetAddress = inetAddress;
 	}
 
-	public void connects() {
-		this.isConnected = true;
-		this.wasConnected = true;
-	}
-
-	public void disconnects() {
-		this.isConnected = false;
-	}
-
-	public UUID getUuid() {
-		return this.uuid;
-	}
-
-	public InetAddress getInetAddress() {
-		return this.inetAddress;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public boolean isConnected() {
-		return this.isConnected;
-	}
-
-	public boolean wasConnected() {
-		return this.wasConnected;
-	}
-
 	public static boolean isUUID(String name) {
 		if (name.length() > 36) return false;
 
@@ -65,6 +32,39 @@ public class PlayerInfo {
 		// - if dash1 and dash2 is positive, dash3 will be -1, dash4 will be
 		//   positive, but so will dash5
 		return dash4 >= 0 && dash5 < 0;
+	}
+
+	public void connects() {
+		this.isConnected = true;
+		this.wasConnected = true;
+	}
+
+	public void disconnects() {
+		this.isConnected = false;
+	}
+
+	public boolean wasConnected() {
+		return this.wasConnected;
+	}
+
+	public UUID getUuid() {
+		return this.uuid;
+	}
+
+	public InetAddress getInetAddress() {
+		return this.inetAddress;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public boolean isConnected() {
+		return this.isConnected;
 	}
 
 }
