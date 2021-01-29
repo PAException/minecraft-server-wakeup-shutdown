@@ -3,11 +3,11 @@ package io.github.paexception.mcsws.plugin;
 import org.bukkit.plugin.Plugin;
 import java.net.ServerSocket;
 
-public class Server {
+public class ServerConnection {
 
 	private ServerSocket serverSocket;
 
-	public Server(Plugin plugin) {
+	public ServerConnection(Plugin plugin) {
 
 	}
 
