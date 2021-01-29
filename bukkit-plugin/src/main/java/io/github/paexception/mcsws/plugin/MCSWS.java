@@ -47,8 +47,6 @@ public class MCSWS extends JavaPlugin implements Listener {
 						}
 					}
 					return true;
-				} else if (args[0].equalsIgnoreCase("config")) {
-
 				} else if (args.length > 1)
 					if (args[0].equalsIgnoreCase("add")) {
 						if (isUUID(args[1])) {
@@ -78,13 +76,13 @@ public class MCSWS extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
-		this.serverConnection.disconnnect();
+		this.serverConnection.stopServer();
 	}
 
 	@Override
 	public void onEnable() {
 		this.getServer().getPluginManager().registerEvents(this, this);
-		this.serverConnection.connect();
+		this.serverConnection.startServer();
 	}
 
 }

@@ -22,10 +22,10 @@ public class ClientHandler implements Runnable {
 		this.socket = socket;
 	}
 
-	public static void playerDisconnected(UUID uuid, String name) {
+	public static boolean playerDisconnected(UUID uuid, String name) {
 		Optional<ClientHandler> clientHandler = connected.stream()
 				.filter(handler -> handler.getPlayerInfo().getUuid().equals(uuid)).findFirst();
-		if (!clientHandler.isPresent()) return;
+		if (!clientHandler.isPresent()) return false;
 
 		try {
 			clientHandler.get().write("await_reconnect");
@@ -35,10 +35,11 @@ public class ClientHandler implements Runnable {
 		Server.getMinecraftServerConnection().awaitConnection(
 				new PlayerAwaitConnectionTask(
 						clientHandler.get(),
-						Server.getConfigHandler().getConfig().getMaxRejoinDelay()
+						Server.getConfigHandler().getConfig().getMaxRejoinDelay() * 1000
 				)
 		);
 		System.out.println("[INFO] " + name + "(" + uuid + ") disconnected from the server. Waiting for reconnect...");
+		return true;
 	}
 
 	@Override
@@ -68,7 +69,7 @@ public class ClientHandler implements Runnable {
 				Server.getMinecraftServerConnection().awaitConnection(
 						new PlayerAwaitConnectionTask(
 								this,
-								Server.getConfigHandler().getConfig().getMaxJoinDelay()
+								Server.getConfigHandler().getConfig().getMaxJoinDelay() * 1000
 						)
 				);
 				this.write("await_connection");

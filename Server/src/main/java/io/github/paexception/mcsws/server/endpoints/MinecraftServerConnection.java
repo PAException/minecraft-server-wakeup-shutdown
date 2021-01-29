@@ -79,7 +79,9 @@ public class MinecraftServerConnection implements Runnable {
 									UUID.fromString(this.input[2]).equals(task.getUUID()))
 									.findFirst().ifPresent(TimerTask::cancel);
 						} else if (this.input[0].equalsIgnoreCase("quit")) {
-							ClientHandler.playerDisconnected(UUID.fromString(this.input[2]), this.input[1]);
+							if (ClientHandler.playerDisconnected(UUID.fromString(this.input[2]), this.input[1]))
+								MinecraftServerConnection.this.socket
+										.getOutputStream().write("possible_shutdown".getBytes());
 						} else if (this.input[0].equalsIgnoreCase("add")) {
 							Server.getConfigHandler().getConfig()
 									.addWakeupPermittedPlayer(UUID.fromString(this.input[2]));
