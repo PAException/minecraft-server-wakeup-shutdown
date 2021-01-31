@@ -53,7 +53,7 @@ public class MCSWS extends JavaPlugin implements Listener {
 							OfflinePlayer op = this.getServer().getOfflinePlayer(UUID.fromString(args[1]));
 							if (op != null) {
 								this.serverConnection.addWakeupPermittedPlayer(op.getName(), op.getUniqueId());
-								sender.sendMessage("§aAdded §b" + op.getName() + " §aas a wakeup permitted player");
+								sender.sendMessage("§aAdded §b" + op.getName() + " §aas a wakeup permitted player...");
 							} else sender.sendMessage("§cCouldn't find player with the specific UUID."
 									+ "Maybe the player hasn't played before?");
 							return true;
@@ -62,13 +62,29 @@ public class MCSWS extends JavaPlugin implements Listener {
 							if (player != null) {
 								this.serverConnection.addWakeupPermittedPlayer(player.getName(), player.getUniqueId());
 								sender.sendMessage("§aAdded §b" + player.getName()
-										+ " §aas a wakeup permitted player");
+										+ " §aas a wakeup permitted player...");
 							} else sender.sendMessage("§cCouldn't find player. Is he/she online?");
 							return true;
 						}
 					} else if (args[0].equalsIgnoreCase("rm")
 							|| args[0].equalsIgnoreCase("remove")) {
-
+						if (isUUID(args[1])) {
+							OfflinePlayer op = this.getServer().getOfflinePlayer(UUID.fromString(args[1]));
+							if (op != null) {
+								this.serverConnection.removeWakeupPermittedPlayer(op.getName(), op.getUniqueId());
+								sender.sendMessage("§aRemoved §b" + op.getName() + " §aas a wakeup permitted player...");
+							} else sender.sendMessage("§cCouldn't find player with the specific UUID."
+									+ "Maybe the player hasn't played before?");
+							return true;
+						} else {
+							Player player = this.getServer().getPlayer(args[1]);
+							if (player != null) {
+								this.serverConnection.removeWakeupPermittedPlayer(player.getName(), player.getUniqueId());
+								sender.sendMessage("§aRemoved §b" + player.getName()
+										+ " §aas a wakeup permitted player...");
+							} else sender.sendMessage("§cCouldn't find player. Is he/she online?");
+							return true;
+						}
 					}
 
 		return false;
