@@ -7,3 +7,4 @@ commands:
     description: Manage who can wakeup the server
     usage: "/wakeup <add|rm> <name> || /wakeup list"
     aliases: [ wu, wup ]
+    permission:

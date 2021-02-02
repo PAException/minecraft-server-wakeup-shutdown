@@ -37,8 +37,9 @@ public class ClientHandler implements Runnable {
 						Server.getConfigHandler().getConfig().getMaxRejoinDelay() * 1000
 				)
 		);
+		clientHandler.get().getPlayerInfo().disconnects();
 		System.out.println("[INFO] " + name + "(" + uuid + ") disconnected from the server. Waiting for reconnect...");
-		return true;
+		return connected.isEmpty();
 	}
 
 	@Override
@@ -92,6 +93,10 @@ public class ClientHandler implements Runnable {
 
 	public EncryptedSocket getSocket() {
 		return this.socket;
+	}
+
+	public static List<ClientHandler> getConnected() {
+		return connected;
 	}
 
 }

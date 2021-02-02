@@ -1,15 +1,23 @@
 package io.github.paexception.mcsws.plugin;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MCSWS extends JavaPlugin implements Listener {
 
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 	private final ServerConnection serverConnection = new ServerConnection(this);
 
 	public static boolean isUUID(String name) {
@@ -85,7 +93,7 @@ public class MCSWS extends JavaPlugin implements Listener {
 							} else sender.sendMessage("§cCouldn't find player. Is he/she online?");
 							return true;
 						}
-					}
+					} else sender.sendMessage("§cYou don't have the permission to perform this command!");
 
 		return false;
 	}
@@ -98,7 +106,34 @@ public class MCSWS extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		this.getServer().getPluginManager().registerEvents(this, this);
-		this.serverConnection.startServer();
+		this.executor.submit(this.serverConnection);
+	}
+
+	@EventHandler
+	public void onJoin(PlayerJoinEvent event) {
+		try {
+			this.serverConnection.write("join."
+					+ event.getPlayer().getName() + "." + event.getPlayer().getUniqueId());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void shutdown() {
+		this.getServer().getWorlds().forEach(World::save);
+		this.getServer().savePlayers();
+		this.getServer().shutdown();
+		System.exit(0);
+	}
+
+	@EventHandler
+	public void onQuit(PlayerQuitEvent event) {
+		try {
+			this.serverConnection.write("quit."
+					+ event.getPlayer().getName() + "." + event.getPlayer().getUniqueId());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

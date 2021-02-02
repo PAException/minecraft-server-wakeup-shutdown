@@ -34,4 +34,8 @@ public class PlayerAwaitConnectionTask extends TimerTask {
 		return this.clientHandler.getPlayerInfo().getUuid();
 	}
 
+	public ClientHandler getClientHandler() {
+		return this.clientHandler;
+	}
+
 }

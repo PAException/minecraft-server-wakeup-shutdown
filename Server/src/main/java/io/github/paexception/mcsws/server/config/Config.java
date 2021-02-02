@@ -1,6 +1,5 @@
 package io.github.paexception.mcsws.server.config;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -46,7 +45,6 @@ public class Config {
 		for (int i = 0; i < bytes.length; i++)
 			bytes[i] = (byte) ((Integer.parseInt(String.valueOf(mac.charAt(i * 2)), 16) * 16)
 					+ (Integer.parseInt(String.valueOf(mac.charAt((i * 2) + 1)), 16)));
-		System.out.println(Arrays.toString(bytes));
 
 		return bytes;
 	}

@@ -40,13 +40,14 @@ public class Client {
 
 			while (socket.getSocket().isConnected()) {
 				String input = socket.read();
-				if (input.equalsIgnoreCase("await_reconnect")) {
+				if (input.equalsIgnoreCase("await_reconnect"))
 					System.out.println("Waiting for reconnection...");
-				} else if (input.equalsIgnoreCase("await_connection")) {
+				else if (input.equalsIgnoreCase("await_connection"))
 					System.out.println("Waiting for connection of player on server...");
-				} else if (input.equalsIgnoreCase("no_permission")) {
+				else if (input.equalsIgnoreCase("no_permission"))
 					System.out.println("You are not allowed to wakeup the server!");
-				}
+				else if (input.equalsIgnoreCase("player_not_connected"))
+					System.out.println("Disconnecting because did not connect to minecraft server");
 			}
 		} catch (IOException e) {
 			System.out.println("Disconnected");
