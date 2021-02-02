@@ -1,19 +1,13 @@
 package io.github.paexception.mcsws.client;
 
-import java.io.File;
+import io.github.paexception.EncryptedSocket;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.Socket;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.security.GeneralSecurityException;
 
 public class Client {
+
+	private static EncryptedSocket socket;
 
 	public static void main(String[] args) {
 		String host;
@@ -26,60 +20,60 @@ public class Client {
 			throw new IllegalArgumentException("That's not a valid port!");
 		}
 		try {
-			Socket socket = new Socket(host, port);
-			byte[] buffer = socket.getInputStream().readAllBytes();
-			PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(buffer));
-			Encryption encryption = new Encryption();
-			socket.getOutputStream().write(encryption.encryptRSA(encryption.getKey().getEncoded(), publicKey));
-
+			System.out.println("Opening encrypted connection...");
 			String[] users = getMinecraftUser();
-
-
-			while (socket.isConnected()) {
-				String input = new String(socket.getInputStream().readAllBytes());
-				if (input.equalsIgnoreCase("await_reconnect")) {
-					System.out.println("Waiting for reconnection...");
-				}else if (input.equalsIgnoreCase("await_connection")) {
-					System.out.println("Waiting for connection...");
-				}else if (input.equalsIgnoreCase("no_permission")) {
-					System.out.println("You are not allowed to start the server!");
+			for (int i = 0; i < users.length; i++) {
+				socket = new EncryptedSocket(host, port);
+				socket.handshakeClient();
+				socket.write(users[i]);
+				String read = socket.read();
+				if (read.equalsIgnoreCase("no_permission")) {
+					System.out.println(users[i].split("\\.")[0] + "doesn't have the permission to wakeup the server");
+					if (i == users.length - 1)
+						System.err.println("You don't have the permission to wakeup the server");
+				} else if (read.equalsIgnoreCase("await_connection")) {
+					System.out.println("Connected and authorized!");
+					System.out.println("Waiting for connection of player on server...");
+					break;
 				}
 			}
-			//name.uuid
 
-			//handle: await_reconnect,
-
-
+			while (socket.getSocket().isConnected()) {
+				String input = socket.read();
+				if (input.equalsIgnoreCase("await_reconnect")) {
+					System.out.println("Waiting for reconnection...");
+				} else if (input.equalsIgnoreCase("await_connection")) {
+					System.out.println("Waiting for connection of player on server...");
+				} else if (input.equalsIgnoreCase("no_permission")) {
+					System.out.println("You are not allowed to wakeup the server!");
+				}
+			}
 		} catch (IOException e) {
-			System.out.println("Can't connect to host!");
-			System.exit(1);
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			System.out.println("Disconnected");
+			System.exit(0);
+		} catch (GeneralSecurityException e) {
+			System.err.println("An error occurred while encrypting:");
 			e.printStackTrace();
 		}
 	}
 
 	private static String[] getMinecraftUser() {
-		String[] id = new String[0];
+		String[] users = new String[0];
 		try {
 			FileInputStream fileInputStream = new FileInputStream(System.getProperty("user.home") + "\\AppData\\Roaming\\.minecraft\\usercache.json");
 			String string = new String(fileInputStream.readAllBytes());
 			fileInputStream.close();
 
-			id = string.split("},\\{");
-			for (int i = 0; i < id.length; i++) {
-				id[i] = id[i];
-				int indexs=id[i].indexOf("name\":\"") +7;//returns the index of is substring
-				int indexe=id[i].indexOf("\",\"");//returns the index of index substring
-				int indexs2=id[i].indexOf("uuid\":\"") +7;//returns the index of is substring
-				int indexe2=id[i].indexOf("\",\"",indexs2);//returns the index of index substring
-				id[i] = id[i].substring( indexs,  indexe) + "." + id[i].substring( indexs2,  indexe2);
-			}
-
+			users = string.split("},\\{");
+			for (int i = 0; i < users.length; i++)
+				users[i] = users[i].substring(users[i].indexOf("name\":\"") + 7, users[i].indexOf("\"", users[i].indexOf("name\":\"") + 7))
+						+ "."
+						+ users[i].substring(users[i].indexOf("uuid\":\"") + 7, users[i].indexOf("\"", users[i].indexOf("uuid\":\"") + 7));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return id;
+		return users;
 	}
 
 }

@@ -1,5 +1,6 @@
 package io.github.paexception.mcsws.server.config;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -43,7 +44,9 @@ public class Config {
 		if (mac.length() != 12) throw new IllegalArgumentException("Invalid Mac: " + mac);
 		byte[] bytes = new byte[6];
 		for (int i = 0; i < bytes.length; i++)
-			bytes[i] = (byte) (Integer.parseInt(mac.substring(i * 2, (i * 2) + 1), 16) & 0xff);
+			bytes[i] = (byte) ((Integer.parseInt(String.valueOf(mac.charAt(i * 2)), 16) * 16)
+					+ (Integer.parseInt(String.valueOf(mac.charAt((i * 2) + 1)), 16)));
+		System.out.println(Arrays.toString(bytes));
 
 		return bytes;
 	}
@@ -63,7 +66,7 @@ public class Config {
 				25566,
 				"255.255.255.255",
 				5,
-				25555,
+				25566,
 				300,
 				120,
 				Collections.singleton(UUID.fromString("34644296-5aba-4444-b468-c8f34711fbab"))

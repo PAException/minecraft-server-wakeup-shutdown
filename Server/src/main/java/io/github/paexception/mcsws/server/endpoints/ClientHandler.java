@@ -1,11 +1,11 @@
 package io.github.paexception.mcsws.server.endpoints;
 
+import io.github.paexception.EncryptedSocket;
 import io.github.paexception.mcsws.server.Server;
-import io.github.paexception.mcsws.server.util.Encryption;
 import io.github.paexception.mcsws.server.util.PlayerInfo;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,12 +14,11 @@ import java.util.UUID;
 public class ClientHandler implements Runnable {
 
 	private static final List<ClientHandler> connected = new ArrayList<>();
-	private final Encryption encryption = new Encryption();
-	private Socket socket;
+	private final EncryptedSocket socket;
 	private PlayerInfo playerInfo;
 
 	public ClientHandler(Socket socket) {
-		this.socket = socket;
+		this.socket = new EncryptedSocket(socket);
 	}
 
 	public static boolean playerDisconnected(UUID uuid, String name) {
@@ -28,8 +27,8 @@ public class ClientHandler implements Runnable {
 		if (!clientHandler.isPresent()) return false;
 
 		try {
-			clientHandler.get().write("await_reconnect");
-		} catch (IOException ignored) {
+			clientHandler.get().socket.write("await_reconnect");
+		} catch (IOException | GeneralSecurityException ignored) {
 		}
 
 		Server.getMinecraftServerConnection().awaitConnection(
@@ -44,27 +43,22 @@ public class ClientHandler implements Runnable {
 
 	@Override
 	public void run() {
-		byte[] buffer;
 		try {
-			this.socket.getOutputStream().write(this.encryption.getKeyPair().getPublic().getEncoded());
-			buffer = this.socket.getInputStream().readAllBytes();
-			this.encryption.setKey(new SecretKeySpec(this.encryption.decryptRSA(buffer), "AES"));
+			this.socket.handshakeServer();
 
-			buffer = this.socket.getInputStream().readAllBytes();
-			String[] info = new String(this.encryption.decryptAES(buffer)).split("\\.");
-			String name = info[0];
+			String[] info = this.socket.read().split("\\.");
 			UUID uuid = UUID.fromString(info[1]);
 			if (!Server.getConfigHandler().getConfig().getWakeupPermittedPlayers().contains(uuid)) {
-				this.write("no_permission");
+				this.socket.write("no_permission");
 				this.disconnect();
 			} else {
 				connected.add(this);
-				this.playerInfo = new PlayerInfo(uuid, this.socket.getInetAddress());
-				this.playerInfo.setName(name);
+				this.playerInfo = new PlayerInfo(uuid, this.socket.getSocket().getInetAddress());
+				this.playerInfo.setName(info[0]);
 
 				if (Server.getMinecraftServerConnection() == null) {
 					Server.startMinecraftServer();
-					System.out.println("[INFO] " + name + "(" + uuid + ") triggered the minecraft server to start");
+					System.out.println("[INFO] " + info[0] + "(" + uuid + ") triggered the minecraft server to start");
 				}
 				Server.getMinecraftServerConnection().awaitConnection(
 						new PlayerAwaitConnectionTask(
@@ -72,23 +66,20 @@ public class ClientHandler implements Runnable {
 								Server.getConfigHandler().getConfig().getMaxJoinDelay() * 1000
 						)
 				);
-				this.write("await_connection");
+				this.socket.write("await_connection");
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("[INFO] " + this.socket.getSocket().getInetAddress() + " threw an exception: " + e.getMessage());
 			this.disconnect();
+		} catch (GeneralSecurityException e) {
+			System.out.println("[INFO] " + this.socket.getSocket() + " threw an exception: " + e.getMessage());
 		}
-	}
-
-	public void write(String msg) throws IOException {
-		this.socket.getOutputStream().write(this.encryption.encryptAES(msg));
 	}
 
 	public void disconnect() {
 		try {
-			this.socket.close();
-		} catch (IOException e) {
-			this.socket = null;
+			this.socket.getSocket().close();
+		} catch (IOException ignored) {
 		}
 		connected.remove(this);
 
@@ -97,6 +88,10 @@ public class ClientHandler implements Runnable {
 
 	public PlayerInfo getPlayerInfo() {
 		return this.playerInfo;
+	}
+
+	public EncryptedSocket getSocket() {
+		return this.socket;
 	}
 
 }

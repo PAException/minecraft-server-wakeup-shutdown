@@ -64,8 +64,11 @@ public class Server {
 		minecraftServerConnection = new MinecraftServerConnection();
 		executorService.submit(minecraftServerConnection);
 
-		WakeOnLan wakeOnLan = new WakeOnLan(Config.convertMac(Server.getConfigHandler().getConfig().getRemoteMac()));
-		wakeOnLan.wakeOnLan();
+		WakeOnLan.wakeOnLan(
+				Config.convertMac(getConfigHandler().getConfig().getRemoteMac()),
+				getConfigHandler().getConfig().getSubnetmask(),
+				getConfigHandler().getConfig().getWakeOnLanPackageCount()
+		);
 	}
 
 	public static ConfigHandler getConfigHandler() {

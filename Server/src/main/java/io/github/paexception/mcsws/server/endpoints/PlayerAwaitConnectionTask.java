@@ -1,6 +1,7 @@
 package io.github.paexception.mcsws.server.endpoints;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.TimerTask;
 import java.util.UUID;
 
@@ -18,8 +19,8 @@ public class PlayerAwaitConnectionTask extends TimerTask {
 	public void run() {
 		if (this.clientHandler != null) {
 			try {
-				this.clientHandler.write("player_not_connected");
-			} catch (IOException ignored) {
+				this.clientHandler.getSocket().write("player_not_connected");
+			} catch (IOException | GeneralSecurityException ignored) {
 			}
 			this.clientHandler.disconnect();
 		}

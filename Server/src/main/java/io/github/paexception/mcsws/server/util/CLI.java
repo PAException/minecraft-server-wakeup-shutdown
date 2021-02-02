@@ -18,6 +18,11 @@ public class CLI implements Runnable {
 				else if (input[0].equalsIgnoreCase("reload") || input[0].equalsIgnoreCase("rl")) {
 					Server.getConfigHandler().loadConfig();
 					System.out.println("[INFO] Reloaded config! (Networking changes apply by restarting the server)");
+				} else if (input[0].equalsIgnoreCase("startmc")) {
+					if (Server.getMinecraftServerConnection() == null) {
+						Server.startMinecraftServer();
+						System.out.println("[INFO] Triggered minecraft server to start");
+					} else System.out.println("[INFO] Minecraft server already running or starting");
 				} else if (input.length > 1 && PlayerInfo.isUUID(input[1].replaceAll("\n", ""))) {
 					input[1] = input[1].replaceAll("\n", "");
 					if (input[0].equalsIgnoreCase("add")) {

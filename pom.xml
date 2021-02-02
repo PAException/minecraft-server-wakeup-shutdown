@@ -12,6 +12,7 @@
         <module>bukkit-plugin</module>
         <module>Server</module>
         <module>Client</module>
+        <module>util</module>
     </modules>
 
 </project>

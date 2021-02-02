@@ -49,7 +49,7 @@ public class MinecraftServerConnection implements Runnable {
 	}
 
 	public void awaitConnection(PlayerAwaitConnectionTask task) {
-		if (this.socket.isConnected()) Server.getTimer().schedule(task, task.getTimout());
+		if (this.socket != null && this.socket.isConnected()) Server.getTimer().schedule(task, task.getTimout());
 		this.awaitingConnections.add(task);
 	}
 
